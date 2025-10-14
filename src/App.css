@@ -1,0 +1,110 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(23,26,33,0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky; /* positioned ancestor for absolute dropdown */
+}
+.nav-inner { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+.brand { font-weight: 800; letter-spacing: 0.3px; }
+.spacer { flex: 1; }
+.nav a { color: var(--color-text-dim); }
+.nav a.active { color: var(--color-text); }
+
+.btn-ghost { background: transparent; border-color: rgba(255,255,255,0.12); }
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 16px;
+  width: 260px;
+  padding: 12px;
+  z-index: 20;
+}
+.menu-list { display: flex; flex-direction: column; gap: 6px; }
+.menu-item { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; }
+.menu-list a:hover .menu-item, .menu-list a.active .menu-item { background: rgba(255,255,255,0.06); color: var(--color-text); }
+
+.page-title { margin: 8px 0 16px; }
+
+.auth-card { width: 100%; max-width: 420px; margin: 48px auto; padding: 24px; }
+.form-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.form-row label { color: var(--color-text-dim); font-size: 14px; }
+.form-actions { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.error { color: var(--color-danger); font-size: 13px; }
+
+.raffle-card { padding: 16px; }
+.raffle-card:hover { transform: translateY(-2px); transition: transform .15s ease; }
+.raffle-card img { width: 100%; border-radius: 10px; }
+.raffle-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.badge { padding: 6px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 999px; font-size: 12px; color: var(--color-text-dim); }
+
+/* Estilos para campos de data - tema escuro */
+input[type="date"] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--color-text) !important;
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e") no-repeat center;
+  background-size: 16px;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: var(--color-text) !important;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--color-text) !important;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z' clip-rule='evenodd'/%3e%3c/svg%3e") no-repeat center;
+  background-size: 16px;
+  opacity: 0.7;
+  cursor: pointer;
+  border: none;
+  padding: 4px;
+}
+
+input[type="date"]::-moz-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Animação de loading */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos para botões do menu */
+.menu-item-button {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-item-button:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.menu-item-button:active {
+  background: rgba(255, 255, 255, 0.1);
+}
