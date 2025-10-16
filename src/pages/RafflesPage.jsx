@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { rafflesService, getImageUrl } from '../services/rifasService.js'
+import SorteioDetector from '../components/SorteioDetector.jsx'
 
 function RafflesPage() {
   const [items, setItems] = useState([])
@@ -48,6 +49,11 @@ function RafflesPage() {
     )
   }
 
+  const handleRifaAtualizada = () => {
+    // Recarregar rifas quando sorteio for concluído
+    loadRaffles()
+  }
+
   return (
     <div className="container">
       <h2 className="page-title">Rifas ativas</h2>
@@ -68,6 +74,11 @@ function RafflesPage() {
               <div style={{ marginTop: 12 }}>
                 <Link className="btn" to={`/rifas/${r.id}`}>Ver detalhes</Link>
               </div>
+              {/* Detector de sorteio para cada rifa */}
+              <SorteioDetector 
+                rifa={r} 
+                onRifaAtualizada={handleRifaAtualizada}
+              />
             </div>
           ))
         ) : (

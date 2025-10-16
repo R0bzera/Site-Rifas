@@ -9,6 +9,7 @@ import RaffleDetailsPage from './pages/RaffleDetailsPage.jsx'
 import CheckoutPage from './pages/CheckoutPage.jsx'
 import DrawnRafflesPage from './pages/DrawnRafflesPage.jsx'
 import AdminRafflesPage from './pages/AdminRafflesPage.jsx'
+import SorteioPage from './pages/SorteioPage.jsx'
 import Navbar from './components/Navbar.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AdminRoute from './components/AdminRoute.jsx'
@@ -29,6 +30,7 @@ function AppContent() {
           <Route path="/" element={<Navigate to="/rifas" replace />} />
           <Route path="/rifas" element={<RafflesPage />} />
           <Route path="/rifas/:id" element={<RaffleDetailsPage />} />
+          <Route path="/rifas/:id/sorteio" element={<SorteioPage />} />
           <Route path="/rifas-sorteadas" element={<DrawnRafflesPage />} />
           <Route element={<ProtectedRoute />}> 
             <Route path="/checkout/:id" element={<CheckoutPage />} />
