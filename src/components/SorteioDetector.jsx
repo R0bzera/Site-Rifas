@@ -46,7 +46,7 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
         const status = await sorteioService.verificarStatusSorteio(rifa.id)
         setStatusSorteio(status)
         
-        // Se rifa está completa e não foi sorteada, iniciar contagem
+        // Verificar se rifa está completa para sorteio automático
         if (status.rifaCompleta && !status.sorteioFinalizado && !contagemIniciada) {
           const agora = new Date()
           setTempoInicioContagem(agora)
@@ -59,7 +59,7 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
             timestamp: Date.now()
           }))
           
-          showSuccess('🎉 Rifa completa! Sorteio será iniciado em 30 segundos!')
+          showSuccess('🎰 Rifa completa! Caça-níquel será iniciado em 30 segundos!')
         }
       } catch (error) {
         console.error('Erro ao verificar status:', error)
@@ -106,7 +106,7 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
           maxWidth: '200px'
         }} onClick={handleIrParaSorteio}>
           <div style={{ fontWeight: 'bold', fontSize: 14, marginBottom: 4 }}>
-            {contagemIniciada ? '⏰ Sorteio em breve!' : '🎰 Sorteio Disponível!'}
+            {contagemIniciada ? '⏰ Sorteio em breve!' : '🎰 Caça-níquel Disponível!'}
           </div>
           <div style={{ fontSize: 12, opacity: 0.9 }}>
             {contagemIniciada ? 'Clique para acompanhar' : 'Clique para ir ao sorteio'}

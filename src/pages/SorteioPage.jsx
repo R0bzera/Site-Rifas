@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { rafflesService, getImageUrl } from '../services/rifasService.js'
 import { sorteioService } from '../services/sorteioService.js'
-import Roulette from '../components/Roulette.jsx'
+import SlotMachine from '../components/SlotMachine.jsx'
 import { useNotificationContext } from '../contexts/NotificationContext.jsx'
 
 function SorteioPage() {
@@ -13,28 +13,19 @@ function SorteioPage() {
   const [rifa, setRifa] = useState(null)
   const [statusSorteio, setStatusSorteio] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [fase, setFase] = useState('loading') // loading, contagem, roleta-tempo, roleta-principal, resultado
+  const [fase, setFase] = useState('loading') // loading, contagem, sorteio, resultado
   const [tempoRestante, setTempoRestante] = useState(0)
-  const [tempoSorteio, setTempoSorteio] = useState(null)
   const [numeroSorteado, setNumeroSorteado] = useState(null)
   const [ganhador, setGanhador] = useState(null)
   const [isSpinning, setIsSpinning] = useState(false)
   const [contagemIniciada, setContagemIniciada] = useState(false)
   const [tempoInicioContagem, setTempoInicioContagem] = useState(null)
   const [mostrandoResultado, setMostrandoResultado] = useState(false)
-  const [tempoRestanteRoulette, setTempoRestanteRoulette] = useState(0)
-  const [roletaIniciada, setRoletaIniciada] = useState(false)
-  const [mostrandoResultadoPrincipal, setMostrandoResultadoPrincipal] = useState(false)
-  const [roletaTempoIniciada, setRoletaTempoIniciada] = useState(false)
+  const [numeroSorteadoBackend, setNumeroSorteadoBackend] = useState(null)
+  const [gerandoNumero, setGerandoNumero] = useState(false)
+  const gerandoNumeroRef = useRef(false)
 
-  // Itens para roleta de tempo (0-59 segundos) - 60 divisórias
-  const itensTempo = Array.from({ length: 60 }, (_, i) => ({ 
-    value: i, 
-    numero: i,
-    label: `${i}` 
-  }))
-
-  // Itens para roleta principal (números da rifa)
+  // Itens para o caça-níquel (números da rifa)
   const itensRifa = Array.from({ length: rifa?.numCotas || 0 }, (_, i) => ({ 
     value: i + 1, 
     numero: i + 1,
@@ -54,12 +45,16 @@ function SorteioPage() {
   }, [tempoInicioContagem, statusSorteio])
 
   useEffect(() => {
+    console.log('🔄 useEffect contagem - fase:', fase, 'tempoRestante:', tempoRestante, 'gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
+    
     let interval = null
     if (fase === 'contagem' && tempoRestante > 0) {
       interval = setInterval(() => {
         setTempoRestante((tempo) => {
-          if (tempo <= 1) {
-            iniciarRoletaTempo()
+          console.log('⏰ Tempo restante:', tempo, 'gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
+          if (tempo <= 1 && !gerandoNumero && !gerandoNumeroRef.current) {
+            console.log('🚀 Chamando iniciarAnimacaoSorteio...')
+            iniciarAnimacaoSorteio()
             return 0
           }
           return tempo - 1
@@ -69,25 +64,7 @@ function SorteioPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [fase, tempoRestante])
-
-  // Cronômetro para roleta principal
-  useEffect(() => {
-    let interval = null
-    if (fase === 'roleta-principal' && tempoSorteio && roletaIniciada && tempoRestanteRoulette > 0) {
-      interval = setInterval(() => {
-        setTempoRestanteRoulette((tempo) => {
-          if (tempo <= 1) {
-            return 0
-          }
-          return tempo - 1
-        })
-      }, 1000)
-    }
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [fase, tempoSorteio, roletaIniciada, tempoRestanteRoulette])
+  }, [fase, tempoRestante, gerandoNumero])
 
   const loadRifaData = async () => {
     try {
@@ -127,7 +104,7 @@ function SorteioPage() {
             setTempoRestante(Math.floor(tempoRestanteCalculado))
             
             if (tempoRestanteCalculado <= 0) {
-              setFase('roleta-tempo')
+              setFase('sorteio')
               // Iniciar animação automaticamente
               setTimeout(() => {
                 setIsSpinning(true)
@@ -136,7 +113,7 @@ function SorteioPage() {
           } else {
             localStorage.removeItem(chaveContagem)
             if (!status.sorteioFinalizado && status.rifaCompleta) {
-              iniciarRoletaTempo()
+              iniciarAnimacaoSorteio()
             } else if (status.sorteioFinalizado) {
               setFase('resultado')
             } else {
@@ -213,59 +190,80 @@ function SorteioPage() {
     showSuccess('Sorteio iniciado! Contagem regressiva de 30 segundos')
   }
 
-  const iniciarRoletaTempo = () => {
-    if (roletaTempoIniciada) return // Evitar múltiplas inicializações
+  const iniciarAnimacaoSorteio = async () => {
+    console.log('🎯 iniciarAnimacaoSorteio chamada - gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
     
-    setRoletaTempoIniciada(true)
-    setFase('roleta-tempo')
-    // Iniciar animação automaticamente após um pequeno delay
-    setTimeout(() => {
-      setIsSpinning(true)
-    }, 500)
-  }
-
-  const onTempoSelecionado = (itemSelecionado) => {
-    setTempoSorteio(itemSelecionado.value)
-    setMostrandoResultado(true)
+    // Evitar chamadas duplicadas com dupla proteção
+    if (gerandoNumero || gerandoNumeroRef.current) {
+      console.log('🎯 Já está gerando número, ignorando chamada duplicada')
+      return
+    }
     
-    // Transição após 3 segundos de pausa
-    setTimeout(() => {
-      setMostrandoResultado(false)
-      setFase('roleta-principal')
-      setTempoRestanteRoulette(itemSelecionado.value)
-      setRoletaIniciada(true)
-      // Iniciar roleta principal imediatamente
-      setIsSpinning(true)
-    }, 3000)
+    console.log('🎯 Iniciando geração de número...')
+    setGerandoNumero(true)
+    gerandoNumeroRef.current = true
+    setFase('sorteio')
+    
+    try {
+      // Primeiro: chamar o backend para gerar o número sorteado
+      console.log('🎯 Chamando backend para gerar número sorteado...')
+      const resultado = await sorteioService.gerarNumeroSorteado(id)
+      
+      // Armazenar o número sorteado pelo backend
+      setNumeroSorteadoBackend(resultado.numeroSorteado)
+      
+      console.log('🎯 Número sorteado pelo backend:', resultado.numeroSorteado)
+      
+      // Depois: iniciar animação com o número correto
+      setTimeout(() => {
+        setIsSpinning(true)
+      }, 500)
+      
+    } catch (error) {
+      showError('Erro ao gerar número sorteado')
+      console.error('Erro:', error)
+      setFase('aguardando')
+    } finally {
+      console.log('🎯 Finalizando geração de número...')
+      setGerandoNumero(false)
+      gerandoNumeroRef.current = false
+    }
   }
 
   const onNumeroSelecionado = async (itemSelecionado) => {
     setIsSpinning(false)
     setNumeroSorteado(itemSelecionado.numero)
-    setMostrandoResultadoPrincipal(true)
+    setMostrandoResultado(true)
     
-    // Pausa de 3 segundos antes de executar o sorteio
+    // Pausa de 3 segundos antes de chamar o backend para finalizar
     setTimeout(async () => {
-      setMostrandoResultadoPrincipal(false)
+      setMostrandoResultado(false)
+      
       try {
+        // Chamar o backend para finalizar o sorteio
+        console.log('🎯 Chamando backend para finalizar sorteio...')
         const resultado = await sorteioService.executarSorteio(id)
         
+        // Armazenar dados do ganhador
         setGanhador({
           nome: resultado.ganhadorNome,
           email: resultado.ganhadorEmail,
           numero: resultado.numeroSorteado
         })
         
+        console.log('🎯 Sorteio finalizado! Ganhador:', resultado.ganhadorNome)
+        
         setFase('resultado')
-        showSuccess(`Sorteio realizado! Número ${resultado.numeroSorteado} foi sorteado!`)
+        showSuccess(`Sorteio realizado! Número ${numeroSorteadoBackend} foi sorteado!`)
         
         // Limpar dados do localStorage
         const chaveContagem = `contagem_rifa_${id}`
         localStorage.removeItem(chaveContagem)
         
       } catch (error) {
-        showError('Erro ao executar sorteio')
+        showError('Erro ao finalizar sorteio')
         console.error('Erro:', error)
+        setFase('aguardando')
       }
     }, 3000)
   }
@@ -461,88 +459,22 @@ function SorteioPage() {
           </div>
         )}
 
-        {fase === 'roleta-tempo' && (
+        {fase === 'sorteio' && (
           <div>
             <h3 style={{ marginBottom: 20 }}>
-              🕒 Determinando tempo de rotação
+              🎰 Sorteando número vencedor
             </h3>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-              <Roulette
-                items={itensTempo}
-                isSpinning={isSpinning}
-                onSpinComplete={onTempoSelecionado}
-                duration={3000}
-                size={500}
-              />
-            </div>
-            {mostrandoResultado ? (
-              <div style={{ 
-                color: 'var(--color-primary)', 
-                fontSize: 18, 
-                fontWeight: 'bold',
-                marginBottom: 10
-              }}>
-                Tempo selecionado: {tempoSorteio} segundos
-              </div>
-            ) : (
-              <p style={{ color: 'var(--color-text-dim)' }}>
-                A roleta determinará por quanto tempo a roleta principal girará
-              </p>
-            )}
-          </div>
-        )}
-
-        {fase === 'roleta-principal' && (
-          <div>
-            <h3 style={{ marginBottom: 20 }}>
-              🎯 Sorteando número vencedor
-            </h3>
-            {tempoSorteio && (
-              <div style={{ 
-                fontSize: 18, 
-                color: 'var(--color-primary)', 
-                marginBottom: 20,
-                fontWeight: 600
-              }}>
-                Tempo de rotação: {tempoSorteio} segundos
-              </div>
-            )}
-            {roletaIniciada && tempoRestanteRoulette > 0 && (
-              <div style={{
-                display: 'inline-block',
-                background: 'rgba(255, 255, 255, 0.1)',
-                padding: '8px 16px',
-                borderRadius: '20px',
-                marginBottom: 20,
-                border: '1px solid var(--color-primary)'
-              }}>
-                <span style={{ 
-                  fontSize: 16, 
-                  color: 'var(--color-text)', 
-                  marginRight: 8
-                }}>
-                  ⏱️
-                </span>
-                <span style={{ 
-                  fontSize: 16, 
-                  color: 'var(--color-primary)', 
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace'
-                }}>
-                  {tempoRestanteRoulette}s
-                </span>
-              </div>
-            )}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-              <Roulette
+              <SlotMachine
                 items={itensRifa}
                 isSpinning={isSpinning}
                 onSpinComplete={onNumeroSelecionado}
-                duration={tempoSorteio ? tempoSorteio * 1000 : 5000}
-                size={600}
+                duration={5000}
+                size={500}
+                numeroSorteadoBackend={numeroSorteadoBackend}
               />
             </div>
-            {mostrandoResultadoPrincipal ? (
+            {mostrandoResultado ? (
               <div style={{ 
                 color: 'var(--color-primary)', 
                 fontSize: 18, 
@@ -553,7 +485,7 @@ function SorteioPage() {
               </div>
             ) : (
               <p style={{ color: 'var(--color-text-dim)' }}>
-                Descobrindo o número da sorte...
+                As rodas estão girando... Descobrindo o número da sorte...
               </p>
             )}
           </div>

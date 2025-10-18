@@ -30,11 +30,39 @@ export const sorteioService = {
   },
 
   /**
+   * Gerar número sorteado para uma rifa
+   * @param {string} rifaId - ID da rifa
+   */
+  async gerarNumeroSorteado(rifaId) {
+    try {
+      const response = await apiRequest(`/Rifa/gerar-numero-sorteado/${rifaId}`, {
+        method: 'POST'
+      })
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
+
+  /**
    * Verificar se rifa está completa (100% vendida)
    * @param {Object} rifa - Dados da rifa
    */
   isRifaCompleta(rifa) {
     return rifa.cotasDisponiveis === 0 && rifa.numCotas > 0
+  },
+
+  /**
+   * Verificar status de sorteio automático
+   * @param {string} rifaId - ID da rifa
+   */
+  async verificarSorteioAutomatico(rifaId) {
+    try {
+      const response = await apiRequest(`/Rifa/verificar-sorteio-automatico/${rifaId}`)
+      return response
+    } catch (error) {
+      throw error
+    }
   },
 
   /**
