@@ -1,4 +1,3 @@
-// Configuração da API usando variáveis de ambiente
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7092/api'
 const AUTH_KEY = import.meta.env.VITE_AUTH_KEY || 'sr_auth_v1'
 const DEBUG_MODE = import.meta.env.VITE_DEBUG === 'true'
@@ -79,7 +78,6 @@ async function apiRequest(endpoint, options = {}) {
 
     return await response.json()
   } catch (error) {
-    // Log apenas em modo debug
     if (DEBUG_MODE) {
       console.error('API Request Error:', error)
     }

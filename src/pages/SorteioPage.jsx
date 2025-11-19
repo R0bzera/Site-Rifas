@@ -13,19 +13,17 @@ function SorteioPage() {
   const [rifa, setRifa] = useState(null)
   const [statusSorteio, setStatusSorteio] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [fase, setFase] = useState('loading') // loading, contagem, sorteio, resultado
+  const [fase, setFase] = useState('loading')
   const [tempoRestante, setTempoRestante] = useState(0)
   const [numeroSorteado, setNumeroSorteado] = useState(null)
   const [ganhador, setGanhador] = useState(null)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [contagemIniciada, setContagemIniciada] = useState(false)
   const [tempoInicioContagem, setTempoInicioContagem] = useState(null)
   const [mostrandoResultado, setMostrandoResultado] = useState(false)
   const [numeroSorteadoBackend, setNumeroSorteadoBackend] = useState(null)
   const [gerandoNumero, setGerandoNumero] = useState(false)
   const gerandoNumeroRef = useRef(false)
 
-  // Itens para o caça-níquel (números da rifa)
   const itensRifa = Array.from({ length: rifa?.numCotas || 0 }, (_, i) => ({ 
     value: i + 1, 
     numero: i + 1,
@@ -45,15 +43,11 @@ function SorteioPage() {
   }, [tempoInicioContagem, statusSorteio])
 
   useEffect(() => {
-    console.log('🔄 useEffect contagem - fase:', fase, 'tempoRestante:', tempoRestante, 'gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
-    
     let interval = null
     if (fase === 'contagem' && tempoRestante > 0) {
       interval = setInterval(() => {
         setTempoRestante((tempo) => {
-          console.log('⏰ Tempo restante:', tempo, 'gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
           if (tempo <= 1 && !gerandoNumero && !gerandoNumeroRef.current) {
-            console.log('🚀 Chamando iniciarAnimacaoSorteio...')
             iniciarAnimacaoSorteio()
             return 0
           }
@@ -70,7 +64,6 @@ function SorteioPage() {
     try {
       setLoading(true)
       
-      // Carregar dados da rifa
       const rifaData = await rafflesService.getById(id)
       if (!rifaData) {
         showError('Rifa não encontrada')
@@ -79,11 +72,9 @@ function SorteioPage() {
       }
       setRifa(rifaData)
 
-      // Carregar status do sorteio
       const status = await sorteioService.verificarStatusSorteio(id)
       setStatusSorteio(status)
 
-      // Verificar se já existe contagem em andamento
       const chaveContagem = `contagem_rifa_${id}`
       const dadosContagem = localStorage.getItem(chaveContagem)
       
@@ -96,16 +87,13 @@ function SorteioPage() {
           if (tempoDecorrido < 30 && !status.sorteioFinalizado) {
             const tempoInicioDate = new Date(tempoInicio)
             setTempoInicioContagem(tempoInicioDate)
-            setContagemIniciada(true)
             setFase('contagem')
             
-            // Calcular tempo restante imediatamente
             const tempoRestanteCalculado = Math.max(0, 30 - tempoDecorrido)
             setTempoRestante(Math.floor(tempoRestanteCalculado))
             
             if (tempoRestanteCalculado <= 0) {
               setFase('sorteio')
-              // Iniciar animação automaticamente
               setTimeout(() => {
                 setIsSpinning(true)
               }, 500)
@@ -159,7 +147,6 @@ function SorteioPage() {
     setTempoRestante(tempoRestanteInteiro)
     
     if (tempoRestanteCalculado <= 0) {
-      // Limpar dados do localStorage
       const chaveContagem = `contagem_rifa_${id}`
       localStorage.removeItem(chaveContagem)
       iniciarRoletaTempo()
@@ -174,10 +161,8 @@ function SorteioPage() {
       return
     }
 
-    // Salvar início da contagem
     const agora = new Date()
     setTempoInicioContagem(agora)
-    setContagemIniciada(true)
     
     const chaveContagem = `contagem_rifa_${id}`
     localStorage.setItem(chaveContagem, JSON.stringify({
@@ -191,40 +176,26 @@ function SorteioPage() {
   }
 
   const iniciarAnimacaoSorteio = async () => {
-    console.log('🎯 iniciarAnimacaoSorteio chamada - gerandoNumero:', gerandoNumero, 'gerandoNumeroRef:', gerandoNumeroRef.current)
-    
-    // Evitar chamadas duplicadas com dupla proteção
     if (gerandoNumero || gerandoNumeroRef.current) {
-      console.log('🎯 Já está gerando número, ignorando chamada duplicada')
       return
     }
     
-    console.log('🎯 Iniciando geração de número...')
     setGerandoNumero(true)
     gerandoNumeroRef.current = true
     setFase('sorteio')
     
     try {
-      // Primeiro: chamar o backend para gerar o número sorteado
-      console.log('🎯 Chamando backend para gerar número sorteado...')
       const resultado = await sorteioService.gerarNumeroSorteado(id)
-      
-      // Armazenar o número sorteado pelo backend
       setNumeroSorteadoBackend(resultado.numeroSorteado)
       
-      console.log('🎯 Número sorteado pelo backend:', resultado.numeroSorteado)
-      
-      // Depois: iniciar animação com o número correto
       setTimeout(() => {
         setIsSpinning(true)
       }, 500)
       
     } catch (error) {
       showError('Erro ao gerar número sorteado')
-      console.error('Erro:', error)
       setFase('aguardando')
     } finally {
-      console.log('🎯 Finalizando geração de número...')
       setGerandoNumero(false)
       gerandoNumeroRef.current = false
     }
@@ -235,34 +206,26 @@ function SorteioPage() {
     setNumeroSorteado(itemSelecionado.numero)
     setMostrandoResultado(true)
     
-    // Pausa de 3 segundos antes de chamar o backend para finalizar
     setTimeout(async () => {
       setMostrandoResultado(false)
       
       try {
-        // Chamar o backend para finalizar o sorteio
-        console.log('🎯 Chamando backend para finalizar sorteio...')
         const resultado = await sorteioService.executarSorteio(id)
         
-        // Armazenar dados do ganhador
         setGanhador({
           nome: resultado.ganhadorNome,
           email: resultado.ganhadorEmail,
           numero: resultado.numeroSorteado
         })
         
-        console.log('🎯 Sorteio finalizado! Ganhador:', resultado.ganhadorNome)
-        
         setFase('resultado')
         showSuccess(`Sorteio realizado! Número ${numeroSorteadoBackend} foi sorteado!`)
         
-        // Limpar dados do localStorage
         const chaveContagem = `contagem_rifa_${id}`
         localStorage.removeItem(chaveContagem)
         
       } catch (error) {
         showError('Erro ao finalizar sorteio')
-        console.error('Erro:', error)
         setFase('aguardando')
       }
     }, 3000)

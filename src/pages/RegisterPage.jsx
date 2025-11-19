@@ -22,7 +22,6 @@ function RegisterPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Dados de redirecionamento vindos de outras páginas
   const { redirectAfterAuth, redirectData, message } = location.state || {}
 
   const onSubmit = async (e) => {
@@ -31,7 +30,6 @@ function RegisterPage() {
     setLoading(true)
     
     try {
-      // Validação de confirmação de senha
       if (password !== confirmPassword) {
         setError('As senhas não coincidem')
         return
@@ -50,14 +48,11 @@ function RegisterPage() {
         return 
       }
       
-      // Mostrar mensagem de sucesso
       showSuccess('Conta criada com sucesso! Você pode fazer login agora.')
       
-      // Se há um redirecionamento configurado, ir para lá
       if (redirectAfterAuth) {
         navigate(redirectAfterAuth, { state: redirectData })
       } else {
-        // Caso contrário, ir para login normalmente
         navigate('/login')
       }
     } catch (error) {

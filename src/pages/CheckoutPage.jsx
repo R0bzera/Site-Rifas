@@ -15,13 +15,11 @@ function CheckoutPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
-  // Dados do formulário
   const [cpf, setCpf] = useState('')
   const [nome, setNome] = useState('')
   const [sobrenome, setSobrenome] = useState('')
   const [email, setEmail] = useState('')
   
-  // Estado do pagamento
   const [pagamento, setPagamento] = useState(null)
   const [criandoPagamento, setCriandoPagamento] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -52,7 +50,6 @@ function CheckoutPage() {
       return
     }
 
-    // Obter dados do usuário
     const userData = authService.getCurrentUser()
     if (userData) {
       setEmail(userData.email || '')
@@ -61,7 +58,6 @@ function CheckoutPage() {
     }
   }, [id, navigate])
 
-  // Cleanup: cancelar verificação ao desmontar
   useEffect(() => {
     return () => {
       if (cancelarVerificacao) {
@@ -102,7 +98,6 @@ function CheckoutPage() {
     const handleCriarPagamento = async (e) => {
     e.preventDefault()
 
-    // Validações
     if (!nome || !sobrenome || !email || !cpf) {
       showError('Por favor, preencha todos os campos')
       return
@@ -113,7 +108,6 @@ function CheckoutPage() {
       return
     }
 
-    // Verificar se usuário está logado
     const currentUser = authService.getCurrentUser()
     if (!currentUser || !currentUser.userId) {
       showError('Você precisa estar logado para fazer uma compra')
@@ -128,12 +122,12 @@ function CheckoutPage() {
         rifaId: raffle.id,
         quantidade: quantity,
         precoUnitario: raffle.preco,
-        amount: totalPrice, // Valor total calculado
+        amount: totalPrice,
         emailPagador: email,
         nomePagador: nome,
         sobrenomePagador: sobrenome,
         cpf: cpf,
-        usuarioId: currentUser?.userId // Adicionar ID do usuário
+        usuarioId: currentUser?.userId
       }
 
       const resultado = await pagamentoService.criarPagamentoPix(dadosPagamento)
@@ -146,12 +140,10 @@ function CheckoutPage() {
       setPagamento(resultado)
       showSuccess('Pagamento criado! Escaneie o QR Code ou copie o código PIX')
 
-      // Iniciar verificação de status
       const cancelFunc = pagamentoService.iniciarVerificacaoPagamento(
         resultado.id,
         (statusAtualizado) => {
           if (statusAtualizado.status === 'approved') {
-            // Usar a mensagem do backend se disponível, senão usar mensagem padrão
             const message = statusAtualizado.message || 'Pagamento aprovado!'
             showSuccess(message)
             setTimeout(() => {

@@ -53,7 +53,6 @@ function RaffleDetailsPage() {
 
   const handleBuy = () => {
     if (!authService.isAuthenticated()) {
-      // Redirecionar para login com opção de cadastro
       navigate('/login', { 
         state: { 
           redirectAfterAuth: `/checkout/${raffle.id}`,
@@ -63,7 +62,6 @@ function RaffleDetailsPage() {
       })
       return
     }
-    // Redirecionar para checkout com a quantidade selecionada
     navigate(`/checkout/${raffle.id}`, { state: { quantity } })
   }
 

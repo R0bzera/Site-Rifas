@@ -1,10 +1,6 @@
 import { apiRequest } from './apiConfig.js'
 
 export const sorteioService = {
-  /**
-   * Verificar status do sorteio de uma rifa
-   * @param {string} rifaId - ID da rifa
-   */
   async verificarStatusSorteio(rifaId) {
     try {
       const response = await apiRequest(`/Rifa/status-sorteio/${rifaId}`)
@@ -14,10 +10,6 @@ export const sorteioService = {
     }
   },
 
-  /**
-   * Executar sorteio de uma rifa
-   * @param {string} rifaId - ID da rifa
-   */
   async executarSorteio(rifaId) {
     try {
       const response = await apiRequest(`/Rifa/sortear/${rifaId}`, {
@@ -29,10 +21,6 @@ export const sorteioService = {
     }
   },
 
-  /**
-   * Gerar número sorteado para uma rifa
-   * @param {string} rifaId - ID da rifa
-   */
   async gerarNumeroSorteado(rifaId) {
     try {
       const response = await apiRequest(`/Rifa/gerar-numero-sorteado/${rifaId}`, {
@@ -44,18 +32,10 @@ export const sorteioService = {
     }
   },
 
-  /**
-   * Verificar se rifa está completa (100% vendida)
-   * @param {Object} rifa - Dados da rifa
-   */
   isRifaCompleta(rifa) {
     return rifa.cotasDisponiveis === 0 && rifa.numCotas > 0
   },
 
-  /**
-   * Verificar status de sorteio automático
-   * @param {string} rifaId - ID da rifa
-   */
   async verificarSorteioAutomatico(rifaId) {
     try {
       const response = await apiRequest(`/Rifa/verificar-sorteio-automatico/${rifaId}`)
@@ -65,11 +45,6 @@ export const sorteioService = {
     }
   },
 
-  /**
-   * Calcular tempo restante para sorteio
-   * @param {Date} dataInicioSorteio - Data de início do sorteio
-   * @param {number} duracaoMinutos - Duração em minutos
-   */
   calcularTempoRestante(dataInicioSorteio, duracaoMinutos = 5) {
     if (!dataInicioSorteio) return null
     

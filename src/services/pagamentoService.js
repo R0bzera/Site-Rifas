@@ -34,9 +34,7 @@ export const pagamentoService = {
    */
   async criarPagamentoPix(dados) {
     try {
-      // Preparar dados do pagamento conforme esperado pelo backend
       const dadosPagamento = {
-        // Dados do pagamento PIX
         amount: dados.amount || (dados.quantidade * (dados.precoUnitario || 0)),
         email: dados.emailPagador,
         firstName: dados.nomePagador,
@@ -45,7 +43,6 @@ export const pagamentoService = {
         documentNumber: dados.cpf.replace(/\D/g, ''),
         description: `Pagamento de ${dados.quantidade} número(s) da rifa`,
         
-        // Dados específicos da rifa (novo fluxo)
         rifaId: dados.rifaId,
         usuarioId: dados.usuarioId,
         quantidadeCotas: dados.quantidade
@@ -69,8 +66,6 @@ export const pagamentoService = {
     try {
       const response = await apiRequest(`/Payment/consultar/${pagamentoId}`)
       
-      // O backend retorna { payment: { status: "approved" }, message: "..." }
-      // Precisamos extrair o status do objeto payment
       if (response && response.payment) {
         return {
           ...response.payment,
@@ -93,7 +88,6 @@ export const pagamentoService = {
     try {
       const response = await apiRequest(`/Payment/by-pedido/${pedidoId}`)
       
-      // O backend retorna { payment: { ... }, paymentOrderId: "...", pedidoId: "..." }
       if (response && response.payment) {
         return {
           ...response.payment,
@@ -136,16 +130,13 @@ export const pagamentoService = {
           onStatusChange(resultado)
         }
 
-        // Parar verificação se pagamento foi aprovado, rejeitado ou cancelado
         if (['approved', 'rejected', 'cancelled'].includes(resultado.status)) {
           clearInterval(interval)
         }
       } catch (error) {
-        // Não limpar o interval, continuar tentando
       }
     }, intervalMs)
 
-    // Retornar função para cancelar verificação
     return () => clearInterval(interval)
   },
 

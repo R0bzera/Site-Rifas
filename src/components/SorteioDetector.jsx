@@ -10,7 +10,6 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
   const [tempoInicioContagem, setTempoInicioContagem] = useState(null)
   const { showSuccess } = useNotificationContext()
 
-  // Verificar se já existe contagem em andamento no localStorage
   useEffect(() => {
     if (!rifa) return
 
@@ -21,14 +20,12 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
       try {
         const { tempoInicio, timestamp } = JSON.parse(dadosContagem)
         const agora = Date.now()
-        const tempoDecorrido = (agora - timestamp) / 1000 // em segundos
+        const tempoDecorrido = (agora - timestamp) / 1000
         
-        // Se ainda não passou 30 segundos (para teste)
         if (tempoDecorrido < 30) {
           setContagemIniciada(true)
           setTempoInicioContagem(new Date(tempoInicio))
         } else {
-          // Limpar dados expirados
           localStorage.removeItem(chaveContagem)
         }
       } catch (error) {
@@ -37,7 +34,6 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
     }
   }, [rifa])
 
-  // Verificar status da rifa periodicamente
   useEffect(() => {
     if (!rifa) return
 
@@ -46,13 +42,11 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
         const status = await sorteioService.verificarStatusSorteio(rifa.id)
         setStatusSorteio(status)
         
-        // Verificar se rifa está completa para sorteio automático
         if (status.rifaCompleta && !status.sorteioFinalizado && !contagemIniciada) {
           const agora = new Date()
           setTempoInicioContagem(agora)
           setContagemIniciada(true)
           
-          // Salvar no localStorage
           const chaveContagem = `contagem_rifa_${rifa.id}`
           localStorage.setItem(chaveContagem, JSON.stringify({
             tempoInicio: agora.toISOString(),
@@ -66,10 +60,8 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
       }
     }
 
-    // Verificar imediatamente
     verificarStatus()
 
-    // Verificar a cada 10 segundos
     const interval = setInterval(verificarStatus, 10000)
 
     return () => clearInterval(interval)
@@ -93,7 +85,7 @@ function SorteioDetector({ rifa, onRifaAtualizada }) {
       {(contagemIniciada || (statusSorteio && statusSorteio.rifaCompleta && !statusSorteio.sorteioFinalizado)) && (
         <div style={{
           position: 'fixed',
-          top: 80, // Mudado de 20 para 80 para evitar conflito com botão de sair
+          top: 80,
           right: 20,
           background: 'linear-gradient(135deg, #ff6b6b, #ffa500)',
           color: 'white',

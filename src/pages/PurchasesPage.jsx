@@ -26,7 +26,6 @@ function PurchasesPage() {
     applyFilters()
   }, [allItems, activeFilter, customDateRange])
 
-  // Polling para verificar mudanças de status das compras pendentes
   useEffect(() => {
     const hasPendingPurchases = allItems.some(item => 
       (item.status || item.statusPagamento) === 'pending'
@@ -36,25 +35,20 @@ function PurchasesPage() {
 
     const interval = setInterval(() => {
       loadPurchases()
-    }, 10000) // Verificar a cada 10 segundos
+    }, 10000)
 
     return () => clearInterval(interval)
   }, [allItems])
 
   useEffect(() => {
-    // Verificar se veio do checkout com sucesso
     if (location.state?.success && location.state?.message) {
       setSuccessMessage(location.state.message)
-      // Recarregar as compras para mostrar o status atualizado
       loadPurchases()
-      // Limpar a mensagem após 5 segundos
       setTimeout(() => setSuccessMessage(''), 5000)
-      // Limpar o state para não mostrar novamente
       window.history.replaceState({}, document.title)
     }
   }, [location.state])
 
-  // Função para recarregar compras (extraída do useEffect)
   const loadPurchases = async () => {
     try {
       const purchases = await purchasesService.getMyPurchases()
@@ -89,7 +83,7 @@ function PurchasesPage() {
             const itemDate = new Date(item.purchaseDate)
             const start = new Date(customDateRange.startDate)
             const end = new Date(customDateRange.endDate)
-            end.setHours(23, 59, 59, 999) // Incluir todo o dia final
+            end.setHours(23, 59, 59, 999)
             return itemDate >= start && itemDate <= end
           })
           setFilteredItems(filtered)
@@ -157,13 +151,11 @@ function PurchasesPage() {
   }
 
   const totalSpent = filteredItems.reduce((total, p) => {
-    // Usar preço da compra se disponível, senão 0
     const price = p.valorUnitario || p.price || 0
     return total + (p.quantity * price)
   }, 0)
 
   const handlePayNow = (purchase) => {
-    // Abrir modal com dados do pagamento existente
     setSelectedPayment(purchase)
     setPaymentModalOpen(true)
   }
@@ -174,7 +166,6 @@ function PurchasesPage() {
   }
 
   const getLuckyNumbers = (purchase) => {
-    // Extrair números da sorte das cotas
     if (purchase.cotas && purchase.cotas.length > 0) {
       return purchase.cotas.map(cota => cota.numero).sort((a, b) => a - b)
     }

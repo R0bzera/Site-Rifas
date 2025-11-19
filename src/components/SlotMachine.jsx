@@ -9,11 +9,9 @@ function SlotMachine({
   numeroSorteadoBackend = null
 }) {
   const [isAnimating, setIsAnimating] = useState(false)
-  const [currentPosition, setCurrentPosition] = useState(0)
   const [selectedItem, setSelectedItem] = useState(null)
   const slotRef = useRef(null)
 
-  // Efeito para iniciar a animação
   useEffect(() => {
     if (isSpinning && !isAnimating) {
       startSpin()
@@ -23,40 +21,27 @@ function SlotMachine({
   const startSpin = () => {
     if (isAnimating) return
     
-    console.log('🎰 Iniciando caça-níquel - Items:', items.length, 'Duração:', duration)
-    console.log('🎯 Número sorteado pelo backend:', numeroSorteadoBackend)
     setIsAnimating(true)
     
-    // Usar o número sorteado pelo backend
     const itemSorteado = items.find(item => item.value === numeroSorteadoBackend) || items[0]
     setSelectedItem(itemSorteado)
     
-    // Animação com CSS puro
     const slotElement = slotRef.current
     if (slotElement) {
       slotElement.style.transition = 'none'
       slotElement.style.transform = 'translateY(0px)'
       
-      // Forçar reflow
       slotElement.offsetHeight
       
-      // Calcular posição final considerando o loop
       const itemHeight = size / 3
       const totalItems = items.length
-      // Ajustar para que o número correto fique no meio
-      // Adicionar algumas voltas completas para dar mais movimento
-      const extraRotations = items.length * 2 // 2 voltas completas
-      // O número sorteado deve ficar no meio, então precisamos ajustar a posição
+      const extraRotations = items.length * 2
       const finalPosition = -((itemSorteado.value - 2) * itemHeight + extraRotations * itemHeight)
-      
-      // Iniciar animação
       slotElement.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
       slotElement.style.transform = `translateY(${finalPosition}px)`
       
-      // Parar animação
       setTimeout(() => {
         setIsAnimating(false)
-        console.log('🎰 Item confirmado:', itemSorteado)
         setTimeout(() => {
           onSpinComplete(itemSorteado)
         }, 1000)
@@ -77,7 +62,6 @@ function SlotMachine({
       position: 'relative',
       minHeight: size + 100
     }}>
-      {/* Slot Machine Container */}
       <div
         style={{
           width: size,
@@ -90,13 +74,12 @@ function SlotMachine({
           boxShadow: 'inset 0 0 30px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.3)'
         }}
       >
-        {/* Container dos números */}
         <div
           ref={slotRef}
           style={{
             position: 'relative',
             height: '100%',
-            transform: `translateY(${currentPosition}px)`
+            transform: 'translateY(0px)'
           }}
         >
           {/* Renderizar números com loop infinito */}
@@ -134,7 +117,6 @@ function SlotMachine({
                   {typeof item === 'object' ? (item.value || item.numero || item.label) : String(item)}
                 </div>
                 
-                {/* Efeito de brilho para o centro */}
                 {isCenter && (
                   <div style={{
                     position: 'absolute',
@@ -151,7 +133,6 @@ function SlotMachine({
           })}
         </div>
         
-        {/* Linha dourada no meio com efeito de brilho */}
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -167,7 +148,6 @@ function SlotMachine({
           background: 'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent)'
         }} />
         
-        {/* Efeito de scanlines */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -180,7 +160,6 @@ function SlotMachine({
         }} />
       </div>
       
-      {/* Ícone e decorações */}
       <div style={{
         position: 'absolute',
         top: -15,
@@ -193,7 +172,6 @@ function SlotMachine({
         🎰
       </div>
       
-      {/* Luzes laterais */}
       <div style={{
         position: 'absolute',
         left: -20,
@@ -220,7 +198,6 @@ function SlotMachine({
         animation: 'blink 1.2s infinite alternate'
       }} />
       
-      {/* CSS para animações */}
       <style jsx>{`
         @keyframes shine {
           0% { transform: translateX(-100%); }

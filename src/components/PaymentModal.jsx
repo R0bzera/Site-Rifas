@@ -41,7 +41,6 @@ function PaymentModal({ isOpen, onClose, pedidoId, rifaTitulo, valorTotal }) {
     }
   }
 
-  // Carregar dados quando o modal abrir
   React.useEffect(() => {
     handleModalOpen()
   }, [isOpen])

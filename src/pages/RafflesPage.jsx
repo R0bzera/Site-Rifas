@@ -50,7 +50,6 @@ function RafflesPage() {
   }
 
   const handleRifaAtualizada = () => {
-    // Recarregar rifas quando sorteio for concluído
     loadRaffles()
   }
 
