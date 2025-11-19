@@ -63,7 +63,7 @@ function DrawnRafflesPage() {
                   </div>
                 </div>
                 <div className="badge">
-                  Ganhador Nº {r.numeroSorteado || 'N/A'}
+                  Ganhador: <span style={{ color: 'green' }}>{r.ganhadorNome || 'N/A'}</span>
                 </div>
               </div>
             </div>
