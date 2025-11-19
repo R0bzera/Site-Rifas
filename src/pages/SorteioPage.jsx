@@ -495,9 +495,6 @@ function SorteioPage() {
                 <div style={{ fontSize: 18, color: 'var(--color-text)', marginBottom: 8 }}>
                   <strong>{ganhador.nome}</strong>
                 </div>
-                <div style={{ fontSize: 14, color: 'var(--color-text-dim)' }}>
-                  Número da sorte: {ganhador.numero}
-                </div>
               </div>
             )}
           </div>
